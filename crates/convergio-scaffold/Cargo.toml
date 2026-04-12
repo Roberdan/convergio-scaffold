@@ -1,0 +1,12 @@
+[package]
+name = "convergio-scaffold"
+description = "Project scaffolding — generates file trees for new repos"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+axum = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+chrono = { workspace = true }
