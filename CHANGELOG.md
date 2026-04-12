@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/Roberdan/convergio-scaffold/compare/convergio-scaffold-v0.1.1...convergio-scaffold-v0.1.2) (2026-04-12)
+
+
+### Documentation
+
+* copy ADR from monorepo ([6f669d6](https://github.com/Roberdan/convergio-scaffold/commit/6f669d63846a1c3d53143ee215529e2a6d569dfe))
+
 ## [0.1.1](https://github.com/Roberdan/convergio-scaffold/compare/convergio-scaffold-v0.1.0...convergio-scaffold-v0.1.1) (2026-04-12)
 
 
