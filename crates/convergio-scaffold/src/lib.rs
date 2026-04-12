@@ -38,7 +38,7 @@ pub struct ScaffoldRequest {
     pub template: Option<String>,
 }
 
-#[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
 pub enum Language {
     Rust,
@@ -46,7 +46,7 @@ pub enum Language {
     Python,
 }
 
-#[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
 pub enum License {
     Mit,
@@ -54,14 +54,14 @@ pub enum License {
     Gpl3,
 }
 
-#[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
 pub enum Visibility {
     Public,
     Private,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 pub struct ScaffoldResponse {
     pub name: String,
     pub files: Vec<ScaffoldFile>,
@@ -69,13 +69,13 @@ pub struct ScaffoldResponse {
     pub branch_protection: BranchProtection,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 pub struct ScaffoldFile {
     pub path: String,
     pub content: String,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 pub struct BranchProtection {
     pub branch: String,
     pub require_pr: bool,
@@ -87,15 +87,50 @@ async fn handle_scaffold(
     State(_state): State<Arc<ScaffoldState>>,
     Json(req): Json<ScaffoldRequest>,
 ) -> Json<serde_json::Value> {
-    if req.name.is_empty() || req.name.len() > 64 {
-        return error_response("NAME_INVALID", "name must be 1-64 chars");
-    }
-    if !req.name.chars().all(|c| c.is_alphanumeric() || c == '-') {
-        return error_response("NAME_INVALID", "alphanumeric and hyphens only");
+    if let Err(e) = validate_request(&req) {
+        return e;
     }
 
     let resp = generate_scaffold(&req);
-    Json(serde_json::to_value(resp).unwrap_or_default())
+    match serde_json::to_value(resp) {
+        Ok(v) => Json(v),
+        Err(_) => error_response("INTERNAL_ERROR", "failed to serialize response"),
+    }
+}
+
+fn validate_request(req: &ScaffoldRequest) -> Result<(), Json<serde_json::Value>> {
+    if req.name.is_empty() || req.name.len() > 64 {
+        return Err(error_response("NAME_INVALID", "name must be 1-64 chars"));
+    }
+    if !req.name.chars().all(|c| c.is_alphanumeric() || c == '-') {
+        return Err(error_response(
+            "NAME_INVALID",
+            "alphanumeric and hyphens only",
+        ));
+    }
+    if req.description.is_empty() || req.description.len() > 256 {
+        return Err(error_response(
+            "DESCRIPTION_INVALID",
+            "description must be 1-256 chars",
+        ));
+    }
+    if req.org_id.is_empty() || req.org_id.len() > 64 {
+        return Err(error_response(
+            "ORG_ID_INVALID",
+            "org_id must be 1-64 chars",
+        ));
+    }
+    if !req
+        .org_id
+        .chars()
+        .all(|c| c.is_alphanumeric() || c == '-' || c == '_')
+    {
+        return Err(error_response(
+            "ORG_ID_INVALID",
+            "org_id: alphanumeric, hyphens, and underscores only",
+        ));
+    }
+    Ok(())
 }
 
 pub(crate) fn generate_scaffold(req: &ScaffoldRequest) -> ScaffoldResponse {

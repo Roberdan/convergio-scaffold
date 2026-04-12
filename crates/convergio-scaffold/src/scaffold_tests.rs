@@ -3,6 +3,68 @@
 use super::*;
 use crate::scaffold_gen::license_spdx;
 
+// --- Input validation tests ---
+
+fn ok_request() -> ScaffoldRequest {
+    ScaffoldRequest {
+        name: "my-project".into(),
+        description: "A test project".into(),
+        language: Language::Rust,
+        license: License::Mit,
+        visibility: Visibility::Public,
+        org_id: "acme".into(),
+        template: None,
+    }
+}
+
+#[test]
+fn validate_rejects_empty_description() {
+    let mut req = ok_request();
+    req.description = String::new();
+    assert!(validate_request(&req).is_err());
+}
+
+#[test]
+fn validate_rejects_long_description() {
+    let mut req = ok_request();
+    req.description = "x".repeat(257);
+    assert!(validate_request(&req).is_err());
+}
+
+#[test]
+fn validate_rejects_empty_org_id() {
+    let mut req = ok_request();
+    req.org_id = String::new();
+    assert!(validate_request(&req).is_err());
+}
+
+#[test]
+fn validate_rejects_org_id_with_special_chars() {
+    let mut req = ok_request();
+    req.org_id = "org/../../etc".into();
+    assert!(validate_request(&req).is_err());
+}
+
+#[test]
+fn validate_accepts_valid_org_id() {
+    let mut req = ok_request();
+    req.org_id = "my_org-123".into();
+    assert!(validate_request(&req).is_ok());
+}
+
+#[test]
+fn validate_rejects_name_with_spaces() {
+    let mut req = ok_request();
+    req.name = "my project".into();
+    assert!(validate_request(&req).is_err());
+}
+
+#[test]
+fn validate_accepts_valid_request() {
+    let req = ok_request();
+    assert!(validate_request(&req).is_ok());
+}
+
 #[test]
 fn rust_scaffold_has_all_agent_files() {
     let req = ScaffoldRequest {
