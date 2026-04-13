@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.5](https://github.com/Roberdan/convergio-scaffold/compare/v0.1.4...v0.1.5) (2026-04-13)
+
+
+### Bug Fixes
+
+* pass CARGO_REGISTRY_TOKEN to release workflow ([ef2851d](https://github.com/Roberdan/convergio-scaffold/commit/ef2851dc2e27b8c71a0d31e82ca1a4479086b08a))
+
 ## [0.1.4](https://github.com/Roberdan/convergio-scaffold/compare/v0.1.3...v0.1.4) (2026-04-13)
 
 
