@@ -4,6 +4,7 @@ description = "Project scaffolding — generates file trees for new repos"
 version = "0.1.3"
 edition.workspace = true
 license.workspace = true
+repository = "https://github.com/Roberdan/convergio-scaffold"
 
 [dependencies]
 axum = { workspace = true }
